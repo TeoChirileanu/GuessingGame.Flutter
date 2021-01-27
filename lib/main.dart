@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -19,42 +20,52 @@ class GuessedNumberForm extends StatefulWidget {
 }
 
 class _GuessedNumberFormState extends State<GuessedNumberForm> {
-  final textEditingController = TextEditingController();
-
-  @override
-  void dispose() {
-    textEditingController.dispose();
-    super.dispose();
-  }
+  int _correctNumber = 13;
+  String _guessResult = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Wanna play a game?"),
+        title: Text("Wanna play a game?"),
       ),
-      body: Center(
-        child: TextField(
-          decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: "Enter your guess:"),
-          controller: textEditingController,
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          return showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                content: Text("Your guess: ${textEditingController.text}"),
-              );
-            },
-          );
-        },
-        tooltip: "Click to check your guess!",
-        child: Icon(Icons.check_circle),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          TextField(
+            decoration: new InputDecoration(labelText: "Enter your guess:"),
+            onSubmitted: checkGuess,
+            textAlign: TextAlign.center,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
+          Text(_guessResult),
+        ],
       ),
     );
+  }
+
+  void checkGuess(String rawGuess) {
+    /*
+    This would have been much easier with C# 9 switch expressions:
+    var guessResult = guess switch {
+      < _correctNumber => "too low",
+      > _correctNumber => "too high",
+      _ => "correct!"
+    };
+    */
+    setState(() {
+      try {
+        int guess = int.parse(rawGuess);
+        if (guess == _correctNumber) {
+          _guessResult = "Correct!";
+          return;
+        }
+        _guessResult = guess > _correctNumber ? "too high!" : "too low!";
+      } catch (e) {
+        _guessResult = e.toString();
+      }
+    });
   }
 }
