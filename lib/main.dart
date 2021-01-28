@@ -30,28 +30,41 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
       appBar: AppBar(
         title: Text("Wanna play a game?"),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          TextField(
-            decoration: new InputDecoration(labelText: "Enter your guess:"),
-            textAlignVertical: TextAlignVertical.center,
-            onSubmitted: checkGuess,
-            enabled: !_gameOver,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      body: Container(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextField(
+                decoration: new InputDecoration(labelText: "Enter your guess:"),
+                textAlignVertical: TextAlignVertical.center,
+                onSubmitted: checkGuess,
+                enabled: !_gameOver,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              Text(_guessResult),
+              Visibility(
+                child: OutlinedButton(
+                  onPressed: resetGameState,
+                  child: Text("Play again"),
+                ),
+                visible: _gameOver,
+              )
+            ],
           ),
-          Text(_guessResult),
-        ],
+        ),
+        margin: EdgeInsets.all(30.0),
+        padding: EdgeInsets.all(25.0),
       ),
     );
   }
 
   void checkGuess(String guessAsString) => setState(() {
-    _guessResult = getGuess(guessAsString);
-    if (_guessResult.contains("Correct")) _gameOver = true;
-  });
+        _guessResult = getGuess(guessAsString);
+        if (_guessResult.contains("Correct")) _gameOver = true;
+      });
 
   String getGuess(String guessAsString) {
     if (guessAsString.isEmpty) return "Empty input";
@@ -62,5 +75,12 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
     if (guessAsInteger == _correctNumber) return "Correct!";
 
     return guessAsInteger > _correctNumber ? "too high!" : "too low!";
+  }
+
+  void resetGameState() {
+    setState(() {
+      _gameOver = false;
+      _guessResult = "";
+    });
   }
 }
