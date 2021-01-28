@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -24,6 +23,8 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
   int _correctNumber = 13;
   String _guessResult = "";
 
+  var _guessController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,22 +36,25 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text("Enter your guess:"),
               TextField(
-                decoration: new InputDecoration(labelText: "Enter your guess:"),
-                textAlignVertical: TextAlignVertical.center,
-                onSubmitted: checkGuess,
-                enabled: !_gameOver,
+                controller: _guessController,
                 textAlign: TextAlign.center,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              Visibility(
+                visible: !_gameOver,
+                child: TextButton(
+                  onPressed: checkGuess,
+                  child: Text("Check"),
+                ),
               ),
               Text(_guessResult),
               Visibility(
+                visible: _gameOver,
                 child: OutlinedButton(
                   onPressed: resetGameState,
                   child: Text("Play again"),
                 ),
-                visible: _gameOver,
               )
             ],
           ),
@@ -61,19 +65,24 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
     );
   }
 
-  void checkGuess(String guessAsString) => setState(() {
-        _guessResult = getGuess(guessAsString);
-        if (_guessResult.contains("Correct")) _gameOver = true;
-      });
+  void checkGuess() {
+    var guessAsString = _guessController.text;
+    var guessResult = getGuess(guessAsString);
+    var gameOver = false;
+    if (guessResult.contains("Correct")) gameOver = true;
+
+    setState(() {
+      _guessResult = guessResult;
+      _gameOver = gameOver;
+      _guessController.text = "";
+    });
+  }
 
   String getGuess(String guessAsString) {
     if (guessAsString.isEmpty) return "Empty input";
-
     int guessAsInteger = int.tryParse(guessAsString);
     if (guessAsInteger == null) return "Invalid number $guessAsString";
-
     if (guessAsInteger == _correctNumber) return "Correct!";
-
     return guessAsInteger > _correctNumber ? "too high!" : "too low!";
   }
 
