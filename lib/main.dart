@@ -20,6 +20,7 @@ class GuessedNumberForm extends StatefulWidget {
 }
 
 class _GuessedNumberFormState extends State<GuessedNumberForm> {
+  bool _gameOver = false;
   int _correctNumber = 13;
   String _guessResult = "";
 
@@ -31,11 +32,12 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           TextField(
             decoration: new InputDecoration(labelText: "Enter your guess:"),
+            textAlignVertical: TextAlignVertical.center,
             onSubmitted: checkGuess,
+            enabled: !_gameOver,
             textAlign: TextAlign.center,
             keyboardType: TextInputType.number,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -46,26 +48,19 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
     );
   }
 
-  void checkGuess(String rawGuess) {
-    /*
-    This would have been much easier with C# 9 switch expressions:
-    var guessResult = guess switch {
-      < _correctNumber => "too low",
-      > _correctNumber => "too high",
-      _ => "correct!"
-    };
-    */
-    setState(() {
-      try {
-        int guess = int.parse(rawGuess);
-        if (guess == _correctNumber) {
-          _guessResult = "Correct!";
-          return;
-        }
-        _guessResult = guess > _correctNumber ? "too high!" : "too low!";
-      } catch (e) {
-        _guessResult = e.toString();
-      }
-    });
+  void checkGuess(String guessAsString) => setState(() {
+    _guessResult = getGuess(guessAsString);
+    if (_guessResult.contains("Correct")) _gameOver = true;
+  });
+
+  String getGuess(String guessAsString) {
+    if (guessAsString.isEmpty) return "Empty input";
+
+    int guessAsInteger = int.tryParse(guessAsString);
+    if (guessAsInteger == null) return "Invalid number $guessAsString";
+
+    if (guessAsInteger == _correctNumber) return "Correct!";
+
+    return guessAsInteger > _correctNumber ? "too high!" : "too low!";
   }
 }
