@@ -20,10 +20,10 @@ class GuessedNumberForm extends StatefulWidget {
 
 class _GuessedNumberFormState extends State<GuessedNumberForm> {
   bool _gameOver = false;
-  int _correctNumber = 13;
+  num _correctNumber = 13;
   String _guessResult = "";
-
-  var _guessController = new TextEditingController();
+  var _guessController = TextEditingController();
+  List<String> _guessAttempts = [];
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +40,7 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
               TextField(
                 controller: _guessController,
                 textAlign: TextAlign.center,
+                enabled: !_gameOver,
               ),
               Visibility(
                 visible: !_gameOver,
@@ -49,6 +50,7 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
                 ),
               ),
               Text(_guessResult),
+              Visibility(visible: _gameOver, child: Text("History: ${guessAttemptsAsString()}")),
               Visibility(
                 visible: _gameOver,
                 child: OutlinedButton(
@@ -67,15 +69,10 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
 
   void checkGuess() {
     var guessAsString = _guessController.text;
-    var guessResult = getGuess(guessAsString);
-    var gameOver = false;
-    if (guessResult.contains("Correct")) gameOver = true;
-
-    setState(() {
-      _guessResult = guessResult;
-      _gameOver = gameOver;
-      _guessController.text = "";
-    });
+    setState(() => _guessResult = getGuess(guessAsString));
+    if (_guessResult.contains("Correct")) setState(() => _gameOver = true);
+    setState(() => _guessController.text = "");
+    _guessAttempts.add(guessAsString);
   }
 
   String getGuess(String guessAsString) {
@@ -90,6 +87,9 @@ class _GuessedNumberFormState extends State<GuessedNumberForm> {
     setState(() {
       _gameOver = false;
       _guessResult = "";
+      _guessAttempts.clear();
     });
   }
+
+  String guessAttemptsAsString() => _guessAttempts.join(", ");
 }
